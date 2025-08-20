@@ -540,7 +540,7 @@ const StartRound = ({ onSuccess }) => {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Route className="w-5 h-5" />
+          <Clock className="w-5 h-5" />
           Iniciar Nova Ronda
         </CardTitle>
       </CardHeader>
