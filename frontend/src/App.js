@@ -16,7 +16,7 @@ import { useToast } from './hooks/use-toast';
 import { Toaster } from './components/ui/toaster';
 
 // Icons
-import { Shield, UserPlus, ClipboardList, Route, BarChart3, LogOut, User, Plus, Camera, Clock, MapPin, FileText, Users, AlertTriangle } from 'lucide-react';
+import { Shield, UserPlus, ClipboardList, BarChart3, LogOut, User, Plus, Camera, Clock, MapPin, Users, AlertTriangle } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
