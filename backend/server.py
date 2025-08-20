@@ -86,6 +86,11 @@ class UserLogin(BaseModel):
     email: EmailStr
     senha: str
 
+class PasswordChange(BaseModel):
+    senha_atual: str
+    nova_senha: str
+    confirmar_senha: str
+
 class Token(BaseModel):
     access_token: str
     token_type: str
