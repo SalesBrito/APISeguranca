@@ -664,7 +664,7 @@ const Dashboard = () => {
               Ocorrências
             </TabsTrigger>
             <TabsTrigger value="rounds" className="flex items-center gap-2">
-              <Route className="w-4 h-4" />
+              <Clock className="w-4 h-4" />
               Rondas
             </TabsTrigger>
             {user.role === 'administrador' && (
