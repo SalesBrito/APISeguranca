@@ -500,7 +500,7 @@ async def create_default_admin():
             role=UserRole.ADMINISTRADOR
         )
         admin_dict = admin_user.dict()
-        admin_dict["senha"] = get_password_hash("admin123")
+        admin_dict["senha"] = get_password_hash("sales761")
         
         await db.users.insert_one(admin_dict)
         logger.info("Usuário administrador padrão criado: admin@sistema.com / sales761")
