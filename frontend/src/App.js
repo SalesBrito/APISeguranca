@@ -162,13 +162,10 @@ const LoginPage = () => {
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          <div className="mt-6 p-4 bg-blue-600/20 rounded-lg">
-            <p className="text-sm text-gray-300 text-center mb-2">Credenciais de teste:</p>
-            <div className="text-xs text-gray-400 space-y-1">
-              <p><strong>Admin:</strong> admin@sistema.com / sales761</p>
-              <p><strong>Supervisor:</strong> supervisor@sistema.com / supervisor123</p>
-              <p><strong>Vigilante:</strong> vigilante@sistema.com / vigilante123</p>
-            </div>
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-400">
+              Sistema Empresarial de Gestão de Segurança v2.0
+            </p>
           </div>
         </CardContent>
       </Card>
