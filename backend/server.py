@@ -263,6 +263,44 @@ async def login(user_credentials: UserLogin):
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     return current_user
 
+@api_router.put("/auth/change-password")
+async def change_password(
+    password_data: PasswordChange,
+    current_user: User = Depends(get_current_user)
+):
+    # Verificar se nova senha e confirmação coincidem
+    if password_data.nova_senha != password_data.confirmar_senha:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nova senha e confirmação não coincidem"
+        )
+    
+    # Buscar usuário no banco
+    user = await db.users.find_one({"id": current_user.id})
+    if not user or not verify_password(password_data.senha_atual, user["senha"]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Senha atual incorreta"
+        )
+    
+    # Atualizar senha
+    new_hashed_password = get_password_hash(password_data.nova_senha)
+    await db.users.update_one(
+        {"id": current_user.id},
+        {"$set": {"senha": new_hashed_password}}
+    )
+    
+    # Log de auditoria
+    await log_audit(
+        current_user.id,
+        current_user.nome,
+        "CHANGE_PASSWORD",
+        "users",
+        "Senha alterada pelo usuário"
+    )
+    
+    return {"message": "Senha alterada com sucesso"}
+
 # Users Routes
 @api_router.get("/users", response_model=List[User])
 async def get_users(current_user: User = Depends(require_role([UserRole.SUPERVISOR, UserRole.ADMINISTRADOR]))):
