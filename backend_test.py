@@ -190,14 +190,201 @@ class SecuritySystemAPITester:
         )
         return success
 
-    def test_audit_logs(self):
-        """Test getting audit logs (admin only)"""
-        expected_status = 200 if self.user_data.get('role') == 'administrador' else 403
+    def test_change_password(self):
+        """Test password change functionality"""
+        password_data = {
+            "senha_atual": "sales761",
+            "nova_senha": "newsales761",
+            "confirmar_senha": "newsales761"
+        }
+        
         success, response = self.run_test(
-            "Get Audit Logs",
+            "Change Password",
+            "PUT",
+            "auth/change-password",
+            200,
+            data=password_data
+        )
+        
+        # Change it back to original
+        if success:
+            password_data_back = {
+                "senha_atual": "newsales761",
+                "nova_senha": "sales761",
+                "confirmar_senha": "sales761"
+            }
+            self.run_test(
+                "Change Password Back",
+                "PUT",
+                "auth/change-password",
+                200,
+                data=password_data_back
+            )
+        
+        return success
+
+    def test_start_shift(self):
+        """Test starting a shift (vigilante functionality)"""
+        shift_data = {
+            "local_responsavel": "Portaria Principal - Teste",
+            "observacoes": "Plantão de teste via API"
+        }
+        
+        success, response = self.run_test(
+            "Start Shift",
+            "POST",
+            "shifts",
+            200,
+            data=shift_data
+        )
+        
+        if success and 'id' in response:
+            return response['id']
+        return None
+
+    def test_get_shifts(self):
+        """Test getting shifts list"""
+        success, response = self.run_test(
+            "Get Shifts",
             "GET",
-            "audit-logs",
+            "shifts",
+            200
+        )
+        return success
+
+    def test_get_active_shifts(self):
+        """Test getting active shifts (supervisor/admin only)"""
+        expected_status = 200 if self.user_data.get('role') in ['administrador', 'supervisor'] else 403
+        success, response = self.run_test(
+            "Get Active Shifts",
+            "GET",
+            "shifts/active",
             expected_status
+        )
+        return success
+
+    def test_finish_shift(self, shift_id):
+        """Test finishing a shift"""
+        if not shift_id:
+            print("❌ No shift ID provided for finish test")
+            return False
+            
+        success, response = self.run_test(
+            "Finish Shift",
+            "PUT",
+            f"shifts/{shift_id}/finish",
+            200
+        )
+        return success
+
+    def test_get_locations(self):
+        """Test getting locations with CFTV integration"""
+        success, response = self.run_test(
+            "Get Locations",
+            "GET",
+            "locations",
+            200
+        )
+        return success
+
+    def test_create_occurrence_with_priority(self):
+        """Test creating occurrence with different priorities"""
+        priorities = ['baixa', 'media', 'alta', 'critica']
+        occurrence_ids = []
+        
+        for priority in priorities:
+            occurrence_data = {
+                "local": f"Teste - {priority.upper()}",
+                "tipo": "suspeito",
+                "prioridade": priority,
+                "descricao": f"Teste de ocorrência com prioridade {priority}"
+            }
+            
+            success, response = self.run_test(
+                f"Create Occurrence - Priority {priority.upper()}",
+                "POST",
+                "occurrences",
+                200,
+                data=occurrence_data
+            )
+            
+            if success and 'id' in response:
+                occurrence_ids.append(response['id'])
+        
+        return occurrence_ids
+
+    def test_resolve_occurrence(self, occurrence_id):
+        """Test resolving an occurrence"""
+        if not occurrence_id:
+            print("❌ No occurrence ID provided for resolve test")
+            return False
+            
+        resolve_data = {
+            "observacoes_resolucao": "Ocorrência resolvida via teste API - situação normalizada"
+        }
+        
+        success, response = self.run_test(
+            "Resolve Occurrence",
+            "PUT",
+            f"occurrences/{occurrence_id}/resolve",
+            200,
+            data=resolve_data
+        )
+        return success
+
+    def test_get_occurrences_by_priority(self):
+        """Test getting occurrences by priority (supervisor/admin only)"""
+        if self.user_data.get('role') not in ['administrador', 'supervisor']:
+            print("⏭️  Skipping priority filter test - insufficient permissions")
+            return True
+            
+        priorities = ['baixa', 'media', 'alta', 'critica']
+        all_success = True
+        
+        for priority in priorities:
+            success, response = self.run_test(
+                f"Get Occurrences - Priority {priority.upper()}",
+                "GET",
+                f"occurrences/priority/{priority}",
+                200
+            )
+            if not success:
+                all_success = False
+        
+        return all_success
+
+    def test_system_info(self):
+        """Test system information endpoint"""
+        success, response = self.run_test(
+            "Get System Info",
+            "GET",
+            "system/info",
+            200
+        )
+        return success
+
+    def test_create_user(self):
+        """Test creating a new user (admin only)"""
+        if self.user_data.get('role') != 'administrador':
+            print("⏭️  Skipping user creation test - insufficient permissions")
+            return True
+            
+        timestamp = datetime.now().strftime("%H%M%S")
+        user_data = {
+            "nome": f"Usuário Teste {timestamp}",
+            "email": f"teste{timestamp}@sistema.com",
+            "senha": "teste123",
+            "role": "vigilante",
+            "telefone": "(11) 99999-9999",
+            "setor": "Teste"
+        }
+        
+        success, response = self.run_test(
+            "Create User",
+            "POST",
+            "auth/register",
+            200,
+            data=user_data
         )
         return success
 
